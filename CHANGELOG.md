@@ -4,7 +4,7 @@ All notable changes to GigaControl Plasma will be documented here.
 
 The format is based on Keep a Changelog.
 
-## [Unreleased]
+## [1.0.0] - 2026-11-17
 
 ### Added
 
@@ -31,3 +31,8 @@ The format is based on Keep a Changelog.
 - Kept hardware access and safety policy in the upstream gigactld project.
 - Made monitoring read-only and hardware changes explicit user actions.
 - Documented possible conflicts with other Turbo Boost controls.
+
+### Validation
+
+- Built and installed the user plasmoid, then observed live telemetry on a
+  Gigabyte G5 KF running CachyOS and KDE Plasma 6.

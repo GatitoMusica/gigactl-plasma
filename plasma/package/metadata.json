@@ -5,7 +5,7 @@
         "Description": "Fan monitoring and RGB keyboard controls for Gigabyte laptops.",
         "Icon": "io.github.smairio.gigactl-symbolic",
         "Category": "System Information",
-        "Version": "0.1.0",
+        "Version": "1.0.0",
         "License": "GPL-3.0-only"
     },
     "KPackageStructure": "Plasma/Applet",
