@@ -20,7 +20,6 @@ Runtime dependencies:
 
 - KDE Plasma 6
 - The upstream gigactld system service
-- The upstream gfan command
 - Hardware supported by the installed upstream gigactl version
 
 ## Build and install for the current user

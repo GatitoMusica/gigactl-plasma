@@ -8,8 +8,6 @@ ecm_add_qml_module(gigacontrolbackend
 
 target_sources(gigacontrolbackend
     PRIVATE
-        hardwarecontroller.cpp
-        hardwarecontroller.h
         daemonclient.cpp
         daemonclient.h
 )

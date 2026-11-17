@@ -8,6 +8,7 @@
 #include <QDBusVariant>
 #include <QMetaType>
 #include <QVariant>
+#include <limits>
 
 namespace {
 
@@ -110,6 +111,66 @@ bool dbusVariantToKeyboardState(
     green = static_cast<int>(greenValue);
     blue = static_cast<int>(blueValue);
     brightness = static_cast<int>(brightnessValue);
+    return true;
+}
+
+bool dbusVariantToTelemetry(
+    const QVariant &wireValue,
+    int &cpuTemperature,
+    int &gpuTemperature,
+    int &cpuFanRpm,
+    int &gpuFanRpm,
+    int &cpuFanDuty,
+    int &gpuFanDuty
+)
+{
+    QVariant value = wireValue;
+
+    if (value.metaType().id() == qMetaTypeId<QDBusVariant>()) {
+        value = qvariant_cast<QDBusVariant>(value).variant();
+    }
+
+    quint32 cpuTemperatureValue = 0;
+    quint32 gpuTemperatureValue = 0;
+    quint32 cpuFanRpmValue = 0;
+    quint32 gpuFanRpmValue = 0;
+    quint32 cpuFanDutyValue = 0;
+    quint32 gpuFanDutyValue = 0;
+
+    if (value.metaType().id() == qMetaTypeId<QDBusArgument>()) {
+        const QDBusArgument argument = qvariant_cast<QDBusArgument>(value);
+        argument.beginStructure();
+        argument >> cpuTemperatureValue >> gpuTemperatureValue
+                 >> cpuFanRpmValue >> gpuFanRpmValue
+                 >> cpuFanDutyValue >> gpuFanDutyValue;
+        argument.endStructure();
+    } else {
+        const QVariantList fields = value.toList();
+        if (fields.size() != 6) {
+            return false;
+        }
+
+        cpuTemperatureValue = fields.at(0).toUInt();
+        gpuTemperatureValue = fields.at(1).toUInt();
+        cpuFanRpmValue = fields.at(2).toUInt();
+        gpuFanRpmValue = fields.at(3).toUInt();
+        cpuFanDutyValue = fields.at(4).toUInt();
+        gpuFanDutyValue = fields.at(5).toUInt();
+    }
+
+    if (cpuTemperatureValue > 255 || gpuTemperatureValue > 255
+        || cpuFanRpmValue > static_cast<quint32>(std::numeric_limits<int>::max())
+        || gpuFanRpmValue > static_cast<quint32>(std::numeric_limits<int>::max())
+        || cpuFanDutyValue > 100 || gpuFanDutyValue > 100) {
+        return false;
+    }
+
+    cpuTemperature = static_cast<int>(cpuTemperatureValue);
+    gpuTemperature = static_cast<int>(gpuTemperatureValue);
+    cpuFanRpm = static_cast<int>(cpuFanRpmValue);
+    gpuFanRpm = static_cast<int>(gpuFanRpmValue);
+    cpuFanDuty = static_cast<int>(cpuFanDutyValue);
+    gpuFanDuty = static_cast<int>(gpuFanDutyValue);
     return true;
 }
 
@@ -234,6 +295,46 @@ QString GigactlDaemonClient::daemonVersion() const
     return m_daemonVersion;
 }
 
+bool GigactlDaemonClient::telemetryAvailable() const
+{
+    return m_telemetryAvailable;
+}
+
+int GigactlDaemonClient::cpuTemperature() const
+{
+    return m_cpuTemperature;
+}
+
+int GigactlDaemonClient::gpuTemperature() const
+{
+    return m_gpuTemperature;
+}
+
+int GigactlDaemonClient::cpuFanRpm() const
+{
+    return m_cpuFanRpm;
+}
+
+int GigactlDaemonClient::gpuFanRpm() const
+{
+    return m_gpuFanRpm;
+}
+
+int GigactlDaemonClient::cpuFanDuty() const
+{
+    return m_cpuFanDuty;
+}
+
+int GigactlDaemonClient::gpuFanDuty() const
+{
+    return m_gpuFanDuty;
+}
+
+QString GigactlDaemonClient::telemetryError() const
+{
+    return m_telemetryError;
+}
+
 bool GigactlDaemonClient::turboAvailable() const
 {
     return m_turboAvailable;
@@ -285,6 +386,8 @@ void GigactlDaemonClient::setAvailable(bool available)
     }
 
     m_available = available;
+    ++m_telemetryReadSerial;
+    m_telemetryReadPending = false;
 
     Q_EMIT availabilityChanged();
 
@@ -306,6 +409,20 @@ void GigactlDaemonClient::setAvailable(bool available)
     m_turboAvailable = false;
     m_turboBoost = false;
 
+    const bool hadTelemetry = m_telemetryAvailable;
+    m_telemetryAvailable = false;
+    m_cpuTemperature = -1;
+    m_gpuTemperature = -1;
+    m_cpuFanRpm = -1;
+    m_gpuFanRpm = -1;
+    m_cpuFanDuty = -1;
+    m_gpuFanDuty = -1;
+    setTelemetryError(QString());
+
+    if (hadTelemetry) {
+        Q_EMIT telemetryChanged();
+    }
+
     if (hadState) {
         Q_EMIT stateChanged();
     }
@@ -323,6 +440,16 @@ void GigactlDaemonClient::setError(const QString &message)
     m_error = message;
 
     Q_EMIT errorChanged();
+}
+
+void GigactlDaemonClient::setTelemetryError(const QString &message)
+{
+    if (m_telemetryError == message) {
+        return;
+    }
+
+    m_telemetryError = message;
+    Q_EMIT telemetryErrorChanged();
 }
 
 // -----------------------------------------------------------------------------
@@ -508,6 +635,99 @@ void GigactlDaemonClient::refreshState()
     }
 
     readState();
+}
+
+void GigactlDaemonClient::refreshTelemetry()
+{
+    if (!m_available || m_telemetryReadPending) {
+        return;
+    }
+
+    m_telemetryReadPending = true;
+    const quint64 readSerial = ++m_telemetryReadSerial;
+
+    QDBusMessage message = QDBusMessage::createMethodCall(
+        SERVICE_NAME,
+        OBJECT_PATH,
+        PROPERTIES_INTERFACE,
+        QStringLiteral("Get")
+    );
+    message.setArguments({
+        QVariant::fromValue(INTERFACE_NAME),
+        QVariant::fromValue(QStringLiteral("Telemetry"))
+    });
+
+    auto *watcher = new QDBusPendingCallWatcher(
+        m_bus.asyncCall(message, DBUS_CALL_TIMEOUT_MS),
+        this
+    );
+
+    connect(
+        watcher,
+        &QDBusPendingCallWatcher::finished,
+        this,
+        [this, watcher, readSerial]() {
+            if (readSerial != m_telemetryReadSerial || !m_available) {
+                watcher->deleteLater();
+                return;
+            }
+
+            m_telemetryReadPending = false;
+            QDBusPendingReply<QDBusVariant> reply = *watcher;
+            if (reply.isError()) {
+                setTelemetryError(
+                    tr("Could not read hardware telemetry: %1")
+                        .arg(reply.error().message())
+                );
+                watcher->deleteLater();
+                return;
+            }
+
+            int cpuTemperature = -1;
+            int gpuTemperature = -1;
+            int cpuFanRpm = -1;
+            int gpuFanRpm = -1;
+            int cpuFanDuty = -1;
+            int gpuFanDuty = -1;
+
+            if (!dbusVariantToTelemetry(
+                    reply.value().variant(),
+                    cpuTemperature,
+                    gpuTemperature,
+                    cpuFanRpm,
+                    gpuFanRpm,
+                    cpuFanDuty,
+                    gpuFanDuty)) {
+                setTelemetryError(tr("The daemon returned invalid telemetry."));
+                watcher->deleteLater();
+                return;
+            }
+
+            const bool changed =
+                !m_telemetryAvailable
+                || m_cpuTemperature != cpuTemperature
+                || m_gpuTemperature != gpuTemperature
+                || m_cpuFanRpm != cpuFanRpm
+                || m_gpuFanRpm != gpuFanRpm
+                || m_cpuFanDuty != cpuFanDuty
+                || m_gpuFanDuty != gpuFanDuty;
+
+            m_telemetryAvailable = true;
+            m_cpuTemperature = cpuTemperature;
+            m_gpuTemperature = gpuTemperature;
+            m_cpuFanRpm = cpuFanRpm;
+            m_gpuFanRpm = gpuFanRpm;
+            m_cpuFanDuty = cpuFanDuty;
+            m_gpuFanDuty = gpuFanDuty;
+            setTelemetryError(QString());
+
+            if (changed) {
+                Q_EMIT telemetryChanged();
+            }
+
+            watcher->deleteLater();
+        }
+    );
 }
 
 void GigactlDaemonClient::setProfile(const QString &name)

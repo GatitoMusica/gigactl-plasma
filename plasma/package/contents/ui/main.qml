@@ -33,20 +33,14 @@ PlasmoidItem {
     toolTipMainText: "GigaControl"
     toolTipSubText: "Fan monitoring and RGB keyboard controls"
 
-    // Hardware access is handled by the native C++ QML module.
-    HardwareController {
-        id: hardwareController
-    }
-
-    // Optional connection to the official gigactl system daemon.
-    // Hardware monitoring through gfan remains available independently.
+    // Read hardware telemetry and control state from the upstream daemon.
     GigactlDaemonClient {
         id: daemonClient
     }
 
     readonly property bool telemetryReady:
         daemonClient.available &&
-        hardwareController.cpuTemperature >= 0
+        daemonClient.telemetryAvailable
 
     readonly property color keyboardColor:
         Qt.rgba(daemonClient.keyboardRed / 255.0,
@@ -70,7 +64,7 @@ PlasmoidItem {
         hexByte(daemonClient.keyboardGreen) +
         hexByte(daemonClient.keyboardBlue)
 
-    // Poll only while the popup is expanded and gigactld can serve the query.
+    // Read telemetry only while the popup is expanded and gigactld is available.
     Timer {
         id: monitoringTimer
 
@@ -81,11 +75,11 @@ PlasmoidItem {
         // Take the first reading immediately when the popup opens.
         onRunningChanged: {
             if (running) {
-                hardwareController.refresh()
+                daemonClient.refreshTelemetry()
             }
         }
 
-        onTriggered: hardwareController.refresh()
+        onTriggered: daemonClient.refreshTelemetry()
     }
 
     ColorDialog {
@@ -339,7 +333,7 @@ PlasmoidItem {
                             Text {
                                 text: "CPU Temperature: " +
                                       (root.telemetryReady
-                                       ? root.formatTemperature(hardwareController.cpuTemperature)
+                                       ? root.formatTemperature(daemonClient.cpuTemperature)
                                        : "— " + root.temperatureUnitSymbol)
                                 color: Kirigami.Theme.textColor
                                 font.pixelSize: 15
@@ -348,7 +342,7 @@ PlasmoidItem {
                             Text {
                                 text: "GPU Temperature: " +
                                       (root.telemetryReady
-                                       ? root.formatTemperature(hardwareController.gpuTemperature)
+                                       ? root.formatTemperature(daemonClient.gpuTemperature)
                                        : "— " + root.temperatureUnitSymbol)
                                 color: Kirigami.Theme.textColor
                                 font.pixelSize: 15
@@ -357,11 +351,11 @@ PlasmoidItem {
                             Text {
                                 text: "CPU Fan: " +
                                       (root.telemetryReady
-                                       ? hardwareController.cpuFanRpm + " RPM"
+                                       ? daemonClient.cpuFanRpm + " RPM"
                                        : "— RPM") +
                                       " · " +
                                       (root.telemetryReady
-                                       ? hardwareController.cpuFanDuty + "%"
+                                       ? daemonClient.cpuFanDuty + "%"
                                        : "—")
                                 color: Kirigami.Theme.textColor
                             }
@@ -369,11 +363,11 @@ PlasmoidItem {
                             Text {
                                 text: "GPU Fan: " +
                                       (root.telemetryReady
-                                       ? hardwareController.gpuFanRpm + " RPM"
+                                       ? daemonClient.gpuFanRpm + " RPM"
                                        : "— RPM") +
                                       " · " +
                                       (root.telemetryReady
-                                       ? hardwareController.gpuFanDuty + "%"
+                                       ? daemonClient.gpuFanDuty + "%"
                                        : "—")
                                 color: Kirigami.Theme.textColor
                             }
@@ -495,8 +489,8 @@ PlasmoidItem {
 
                             Text {
                                 visible: daemonClient.available &&
-                                         hardwareController.error.length > 0
-                                text: "Monitoring error: " + hardwareController.error
+                                         daemonClient.telemetryError.length > 0
+                                text: "Monitoring error: " + daemonClient.telemetryError
                                 color: Kirigami.Theme.disabledTextColor
                                 font.pixelSize: 11
                                 wrapMode: Text.Wrap

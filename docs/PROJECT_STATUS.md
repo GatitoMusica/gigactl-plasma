@@ -1,6 +1,6 @@
 # Project status
 
-Last reviewed: 2026-11-14
+Last reviewed: 2026-11-17
 
 ## Product
 
@@ -12,6 +12,8 @@ GitHub repository: GatitoMusica/gigactl-plasma.
 
 - Native Plasma 6 applet with Cooling, RGB Keyboard and Settings pages.
 - C++ QML module for telemetry and system D-Bus communication.
+- Cooling telemetry is read from gigactld over D-Bus at the configured interval;
+  the widget no longer launches `gfan` to collect readings.
 - Cooling values and upstream fan profile selection.
 - Keyboard power, brightness and color controls.
 - Turbo Boost control with an on-screen conflict notice.
@@ -22,10 +24,11 @@ GitHub repository: GatitoMusica/gigactl-plasma.
 ## Interactive validation
 
 The applet has been tried on the development Gigabyte G5 KF with CachyOS,
-Plasma 6 and gigactld. Cooling updates, profile changes, keyboard controls,
-and Turbo Boost changes have been observed. The daemon-unavailable UI state has
-also been observed. This is one-machine interactive validation; broader model
-coverage and a repeatable automated test suite remain outstanding.
+Plasma 6 and gigactld. The new D-Bus telemetry path updates temperatures, RPM
+and fan duty live. Profile changes, keyboard controls, Turbo Boost changes and
+the daemon-unavailable UI state have also been observed. This is one-machine
+interactive validation; broader model coverage and a repeatable automated test
+suite remain outstanding.
 
 ## Release preparation still needed
 

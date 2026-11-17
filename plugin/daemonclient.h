@@ -33,6 +33,38 @@ class GigactlDaemonClient : public QObject
                READ daemonVersion
                NOTIFY stateChanged)
 
+    Q_PROPERTY(bool telemetryAvailable
+               READ telemetryAvailable
+               NOTIFY telemetryChanged)
+
+    Q_PROPERTY(int cpuTemperature
+               READ cpuTemperature
+               NOTIFY telemetryChanged)
+
+    Q_PROPERTY(int gpuTemperature
+               READ gpuTemperature
+               NOTIFY telemetryChanged)
+
+    Q_PROPERTY(int cpuFanRpm
+               READ cpuFanRpm
+               NOTIFY telemetryChanged)
+
+    Q_PROPERTY(int gpuFanRpm
+               READ gpuFanRpm
+               NOTIFY telemetryChanged)
+
+    Q_PROPERTY(int cpuFanDuty
+               READ cpuFanDuty
+               NOTIFY telemetryChanged)
+
+    Q_PROPERTY(int gpuFanDuty
+               READ gpuFanDuty
+               NOTIFY telemetryChanged)
+
+    Q_PROPERTY(QString telemetryError
+               READ telemetryError
+               NOTIFY telemetryErrorChanged)
+
     Q_PROPERTY(bool turboAvailable
                READ turboAvailable
                NOTIFY turboStateChanged)
@@ -73,6 +105,14 @@ public:
     QString activeProfile() const;
     QString ecStatus() const;
     QString daemonVersion() const;
+    bool telemetryAvailable() const;
+    int cpuTemperature() const;
+    int gpuTemperature() const;
+    int cpuFanRpm() const;
+    int gpuFanRpm() const;
+    int cpuFanDuty() const;
+    int gpuFanDuty() const;
+    QString telemetryError() const;
     bool turboAvailable() const;
     bool turboBoost() const;
     bool keyboardEnabled() const;
@@ -83,6 +123,7 @@ public:
     QString error() const;
 
     Q_INVOKABLE void refreshState();
+    Q_INVOKABLE void refreshTelemetry();
     Q_INVOKABLE void setProfile(const QString &name);
     Q_INVOKABLE void restoreFirmware();
     Q_INVOKABLE void setTurboBoost(bool enabled);
@@ -93,6 +134,8 @@ public:
 Q_SIGNALS:
     void availabilityChanged();
     void stateChanged();
+    void telemetryChanged();
+    void telemetryErrorChanged();
     void turboStateChanged();
     void keyboardStateChanged();
     void errorChanged();
@@ -100,6 +143,7 @@ Q_SIGNALS:
 private:
     void setAvailable(bool available);
     void setError(const QString &message);
+    void setTelemetryError(const QString &message);
     void readState();
     void callKeyboardMethod(
         const QString &method,
@@ -123,6 +167,16 @@ private:
     QString m_activeProfile;
     QString m_ecStatus;
     QString m_daemonVersion;
+    bool m_telemetryAvailable = false;
+    int m_cpuTemperature = -1;
+    int m_gpuTemperature = -1;
+    int m_cpuFanRpm = -1;
+    int m_gpuFanRpm = -1;
+    int m_cpuFanDuty = -1;
+    int m_gpuFanDuty = -1;
+    QString m_telemetryError;
+    quint64 m_telemetryReadSerial = 0;
+    bool m_telemetryReadPending = false;
     bool m_turboAvailable = false;
     bool m_turboBoost = false;
     quint64 m_turboAvailableRevision = 0;

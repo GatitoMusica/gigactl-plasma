@@ -23,10 +23,10 @@ software; the Settings page explains this limitation.
 ## Architecture
 
 This repository contains the Plasma interface and its C++ QML plugin. The
-plugin reads telemetry with the upstream gfan command and communicates with
-gigactld over the system D-Bus for fan profiles, keyboard controls and Turbo
-Boost. GigaControl does not implement an EC protocol; the upstream project
-owns hardware access and its safety checks.
+plugin reads telemetry and communicates with gigactld over the system D-Bus
+for fan profiles, keyboard controls and Turbo Boost. GigaControl does not
+implement an EC protocol; the upstream project owns hardware access and its
+safety checks.
 
 The daemon and its CLI are maintained separately in
 [smairio/gigactl](https://github.com/smairio/gigactl). Install and enable
@@ -52,7 +52,7 @@ user installation can be built with CMake. Requirements:
 - CMake 3.20 or newer and a C++17 compiler
 - ECM 6.0 or newer
 - Qt 6.5 or newer with Core, QML and D-Bus development components
-- gigactld and the upstream gfan command at runtime
+- gigactld at runtime
 
 From the repository root:
 

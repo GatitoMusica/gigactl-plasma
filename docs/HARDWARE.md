@@ -33,7 +33,6 @@ validated carefully on each supported model.
 
 - KDE Plasma 6.
 - The upstream gigactld system service, installed and running.
-- The upstream gfan command for telemetry.
 - A laptop supported by the installed upstream gigactl version.
 
 The daemon owns EC access and applies upstream model checks and safety rules.

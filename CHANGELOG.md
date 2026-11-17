@@ -17,6 +17,9 @@ The format is based on Keep a Changelog.
 
 ### Changed
 
+- Read Cooling telemetry directly from the upstream gigactld D-Bus API at the
+  configured interval, removing the runtime dependency on the gfan process and
+  its text output format.
 - Replaced the Rofi and PySide6 prototypes with the native Plasma applet.
 - Removed the old prototype files from the current source tree; their history
   remains available in Git.

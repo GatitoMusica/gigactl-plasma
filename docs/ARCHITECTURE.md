@@ -11,9 +11,6 @@ the daemon and telemetry calls.
         +-- GigaControl QML applet
                 |
                 +-- org.gigactl.hardware QML module
-                        |
-                        +-- HardwareController -- gfan status query
-                        |
                         +-- GigactlDaemonClient -- system D-Bus -- gigactld
                                                                    |
                                                                    +-- EC access
@@ -42,26 +39,23 @@ The popup has three pages:
 
 plugin builds the org.gigactl.hardware QML module.
 
-- HardwareController runs the read-only gfan status command asynchronously,
-  parses its output and reports readings or errors to QML. The popup polls only
-  while expanded and the daemon is available.
-- GigactlDaemonClient connects to the upstream system D-Bus service. It reads
-  daemon properties and sends supported profile, keyboard and Turbo Boost
-  requests.
+- GigactlDaemonClient reads telemetry and daemon properties over the upstream
+  system D-Bus connection, and sends supported profile, keyboard and Turbo
+  Boost requests.
 
 ### Daemon and hardware
 
 gigactld is a separate upstream dependency. It owns EC access and exposes
-hardware controls over system D-Bus. The upstream gfan utility performs the
-telemetry query and follows its own daemon-aware behavior and safety checks.
-GigaControl does not run privileged commands or access EC registers directly.
+telemetry and hardware controls over system D-Bus. GigaControl does not run
+privileged commands or access EC registers directly.
 
 ## Monitoring and state
 
 The Plasmoid configuration stores the temperature unit and monitoring
-interval. Supported polling intervals are 2, 5 and 10 seconds. Monitoring
-starts when the popup opens and stops when it closes. The UI keeps the latest
-successful reading while a refresh is in progress.
+interval. Supported polling intervals are 2, 5 and 10 seconds. Telemetry is
+read from gigactld while the popup is open; polling stops when it closes. The
+UI keeps the latest successful reading if a refresh fails and clears readings
+when the daemon disconnects.
 
 The daemon's reported state is authoritative for fan profiles, keyboard
 settings and Turbo Boost. When the daemon is unavailable, hardware controls
