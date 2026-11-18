@@ -41,10 +41,11 @@ does not install or configure the upstream system daemon.
 ## Install the daemon
 
 Install gigactld separately by following the instructions in the
-[upstream repository](https://github.com/smairio/gigactl). The service must be
-running for telemetry and controls to be available in the applet. GigaControl
-does not install privileged policy, change kernel modules or create local
-sudoers rules.
+[GigaControl daemon repository](https://github.com/GatitoMusica/gigactl), a
+fork of the original [smairio/gigactl](https://github.com/smairio/gigactl)
+project. The service must be running for telemetry and controls to be available
+in the applet. GigaControl Plasma does not install privileged policy, change
+kernel modules or create local sudoers rules.
 
 ## Uninstallation
 

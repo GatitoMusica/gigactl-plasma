@@ -2,16 +2,19 @@
 
 The 1.0.0 package recipes are being prepared for three Linux package families:
 
-- Debian and Ubuntu: `gigactl-plasma` depends on upstream's `gigactl` package,
+- Debian and Ubuntu: `gigactl-plasma` depends on the daemon fork's `gigactl` package,
   which currently contains the daemon and GTK desktop tools.
 - Fedora and compatible RPM distributions: `gigactl-plasma` depends on the
-  standalone `gigactld` RPM recipe in the upstream repository.
+  standalone `gigactld` RPM recipe in the daemon repository.
 - Arch and CachyOS: `gigactl-plasma` depends on the standalone `gigactld`
-  `PKGBUILD` in the upstream repository.
+  `PKGBUILD` in the daemon repository.
 
 The Plasma repository's `v1.0.0` release workflow builds and attaches DEB, RPM
-and Arch packages when that tag is pushed. Publish upstream `gigactl` `v1.0.3`
-first so its D-Bus API and daemon packages are available to the Plasma packages.
+and Arch packages when that tag is pushed. Publish
+[GatitoMusica/gigactl](https://github.com/GatitoMusica/gigactl) `v1.0.3` first
+so its D-Bus API and daemon packages are available to the Plasma packages. This
+daemon repository is a fork of the original
+[smairio/gigactl](https://github.com/smairio/gigactl) project.
 GitHub also provides source-code ZIP and tar.gz archives for each tagged release.
 
 ## Local package builds

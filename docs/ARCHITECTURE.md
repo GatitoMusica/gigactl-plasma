@@ -15,9 +15,10 @@ the daemon and telemetry calls.
                                                                    |
                                                                    +-- EC access
 
-The hardware daemon and CLI utilities are maintained by
-[smairio/gigactl](https://github.com/smairio/gigactl). This repository does
-not implement the EC protocol.
+The hardware daemon and CLI utilities are maintained in the
+[GigaControl daemon repository](https://github.com/GatitoMusica/gigactl), a
+fork of [smairio/gigactl](https://github.com/smairio/gigactl). This repository
+does not implement the EC protocol.
 
 ## Components
 

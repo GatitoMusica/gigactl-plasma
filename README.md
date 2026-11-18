@@ -1,8 +1,9 @@
 # GigaControl Plasma
 
 GigaControl Plasma is a KDE Plasma 6 widget for monitoring cooling and
-controlling supported Gigabyte laptop features through the upstream
-[gigactld](https://github.com/smairio/gigactl) daemon.
+controlling supported Gigabyte laptop features through the GigaControl
+[gigactld fork](https://github.com/GatitoMusica/gigactl), based on the original
+[smairio/gigactl](https://github.com/smairio/gigactl) project.
 
 The widget is called **GigaControl** in Plasma. The **GigaControl Plasma**
 project name distinguishes this frontend from the upstream daemon and CLI
@@ -29,8 +30,9 @@ implement an EC protocol; the upstream project owns hardware access and its
 safety checks.
 
 The daemon and its CLI are maintained separately in
-[smairio/gigactl](https://github.com/smairio/gigactl). Install and enable
-gigactld before using the widget.
+[GatitoMusica/gigactl](https://github.com/GatitoMusica/gigactl), a fork of the
+original [smairio/gigactl](https://github.com/smairio/gigactl) project. Install
+and enable gigactld before using the widget.
 
 ## Compatibility and testing
 

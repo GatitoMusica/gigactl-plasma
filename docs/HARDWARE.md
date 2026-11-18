@@ -2,11 +2,12 @@
 
 ## Hardware support
 
-GigaControl Plasma depends on the hardware support provided by the upstream
-[gigactl project](https://github.com/smairio/gigactl). Check its README for
-the current model list and distinguish maintainer-verified hardware from
-community reports. Those upstream reports do not by themselves validate this
-Plasma frontend.
+GigaControl Plasma depends on the hardware support provided by the
+[GigaControl daemon fork](https://github.com/GatitoMusica/gigactl), based on
+[smairio/gigactl](https://github.com/smairio/gigactl). Check its README for the
+current model list and distinguish maintainer-verified hardware from community
+reports. Those daemon reports do not by themselves validate this Plasma
+frontend.
 
 Development and interactive testing for this frontend have used a Gigabyte
 G5 KF running CachyOS and KDE Plasma 6.
