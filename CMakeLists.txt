@@ -42,3 +42,26 @@ plasma_install_package(plasma/package com.gigactl.control)
 # Install its symbolic panel icon in the user's icon theme.
 install(FILES plasma/package/contents/icons/io.github.smairio.gigactl-symbolic.svg
     DESTINATION ${KDE_INSTALL_ICONDIR}/hicolor/symbolic/apps)
+
+# Native release packages. The daemon remains a separate upstream package.
+set(CPACK_PACKAGE_NAME "gigactl-plasma")
+set(CPACK_PACKAGE_VENDOR "GigaControl")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
+    "KDE Plasma widget for Gigabyte laptop controls")
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
+set(CPACK_PACKAGE_CONTACT "GigaControl maintainers")
+set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
+set(CPACK_PACKAGE_DIRECTORY "${CMAKE_BINARY_DIR}/packages")
+set(CPACK_GENERATOR "DEB;RPM")
+
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "GigaControl maintainers")
+set(CPACK_DEBIAN_PACKAGE_SECTION "kde")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS
+    "gigactl (>= 1.0.3), plasma-workspace, qml6-module-org-kde-kirigami")
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+
+set(CPACK_RPM_PACKAGE_LICENSE "GPL-3.0-only")
+set(CPACK_RPM_PACKAGE_GROUP "Applications/System")
+set(CPACK_RPM_PACKAGE_REQUIRES "gigactld >= 1.0.3, plasma-workspace")
+
+include(CPack)
